@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metaflow-optuna"
+version = "0.1.0"
+description = "Adaptive hyperparameter tuning for Metaflow using Optuna"
+requires-python = ">=3.9"
+dependencies = [
+    "metaflow>=2.9",
+    "optuna>=3.0",
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.23",
+    "httpx>=0.24",
+    "plotly>=5.0",
+    "matplotlib>=3.5",
+]
+
+[project.optional-dependencies]
+ngrok = ["pyngrok>=6.0"]
+dev   = ["pytest", "scikit-learn"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["metaflow_optuna*"]
