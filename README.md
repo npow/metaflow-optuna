@@ -1,5 +1,10 @@
 # metaflow-optuna
 
+[![PyPI version](https://img.shields.io/pypi/v/metaflow-optuna?style=flat-square)](https://pypi.org/project/metaflow-optuna/)
+[![CI](https://github.com/npow/metaflow-optuna/actions/workflows/ci.yml/badge.svg)](https://github.com/npow/metaflow-optuna/actions/workflows/ci.yml)
+[![Python versions](https://img.shields.io/pypi/pyversions/metaflow-optuna?style=flat-square)](https://pypi.org/project/metaflow-optuna/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)
+
 Optuna hyperparameter tuning that fits naturally into Metaflow — parallel trials as native tasks, adaptive TPE that actually adapts, and results you can read without digging through logs.
 
 ---
@@ -186,3 +191,7 @@ render_study_html(study)    # returns self-contained HTML string
 ```bash
 python examples/sklearn_tuning.py run --n_trials 20
 ```
+
+## License
+
+Apache 2.0 — see [LICENSE](LICENSE).
