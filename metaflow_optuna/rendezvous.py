@@ -78,6 +78,39 @@ def await_coordinator(
     )
 
 
+def save_checkpoint(coordinator_id: str, completed: int) -> None:
+    """Persist completed trial count so a restarted coordinator can resume."""
+    payload = json.dumps({"completed": completed})
+    if _is_remote():
+        import boto3
+        bucket, key = _s3_key(coordinator_id)
+        key = key.replace("/endpoint", "/checkpoint")
+        boto3.client("s3").put_object(Bucket=bucket, Key=key, Body=payload)
+    else:
+        path = _LOCAL_TMP.format(coordinator_id + "-checkpoint")
+        with open(path, "w") as f:
+            f.write(payload)
+
+
+def load_checkpoint(coordinator_id: str) -> int:
+    """Return previously persisted completed count, or 0 if none exists."""
+    try:
+        if _is_remote():
+            import boto3
+            bucket, key = _s3_key(coordinator_id)
+            key = key.replace("/endpoint", "/checkpoint")
+            obj = boto3.client("s3").get_object(Bucket=bucket, Key=key)
+            return json.loads(obj["Body"].read())["completed"]
+        else:
+            path = _LOCAL_TMP.format(coordinator_id + "-checkpoint")
+            if not os.path.exists(path):
+                return 0
+            with open(path) as f:
+                return json.loads(f.read())["completed"]
+    except Exception:
+        return 0
+
+
 def _read_endpoint(coordinator_id: str) -> str | None:
     if _is_remote():
         import boto3

@@ -76,11 +76,17 @@ def run_coordinator_service(
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     # --- Init global state ---
+    from metaflow_optuna.rendezvous import load_checkpoint
+    prev_completed = load_checkpoint(coordinator_id)
+
     _app_mod._study = optuna.create_study(direction=direction, sampler=sampler)
     _app_mod._pending = {}
     _app_mod._n_total = n_trials
-    _app_mod._completed = 0
+    _app_mod._coordinator_id = coordinator_id
+    _app_mod._completed = prev_completed
     _app_mod._done.clear()
+    if prev_completed >= n_trials:
+        _app_mod._done.set()
 
     # --- Discover address ---
     actual_port = _find_free_port(port or 8765)

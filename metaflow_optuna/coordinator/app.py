@@ -24,6 +24,7 @@ _pending: dict[int, optuna.trial.Trial] = {}   # trial_number → live Trial
 _n_total: int = 0
 _completed: int = 0
 _done = threading.Event()
+_coordinator_id: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -115,6 +116,8 @@ async def tell(req: TellRequest):
         _study.tell(trial, state=optuna.trial.TrialState.FAIL)
 
     _completed += 1
+    from metaflow_optuna.rendezvous import save_checkpoint
+    save_checkpoint(_coordinator_id, _completed)
     if _completed >= _n_total:
         _done.set()
 
