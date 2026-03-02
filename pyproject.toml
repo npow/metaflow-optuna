@@ -10,6 +10,7 @@ requires-python = ">=3.9"
 dependencies = [
     "metaflow>=2.9",
     "optuna>=3.0",
+    "metaflow-session-service>=0.1",
     "fastapi>=0.100",
     "uvicorn[standard]>=0.23",
     "httpx>=0.24",

@@ -3,44 +3,12 @@ Coordinator service lifecycle management.
 """
 from __future__ import annotations
 
-import socket
-import threading
-import time
 from typing import TYPE_CHECKING
 
 import optuna
 
 if TYPE_CHECKING:
     pass
-
-
-def _get_local_ip() -> str:
-    """
-    Returns 127.0.0.1 for local runs (all tasks on the same host),
-    or the VPC private IP for remote runs (AWS Batch / Kubernetes).
-    """
-    from metaflow_optuna.rendezvous import _is_remote
-    if not _is_remote():
-        return "127.0.0.1"
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return "127.0.0.1"
-
-
-def _find_free_port(start: int = 8765) -> int:
-    for port in range(start, start + 100):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("0.0.0.0", port))
-                return port
-            except OSError:
-                continue
-    raise RuntimeError(f"No free port found starting at {start}")
 
 
 def run_coordinator_service(
@@ -58,7 +26,7 @@ def run_coordinator_service(
 
     Called from within the @optuna_coordinator-decorated step.
     """
-    import uvicorn
+    from metaflow_session_service import FastAPIService
 
     from .app import app, _done
     import metaflow_optuna.coordinator.app as _app_mod
@@ -88,44 +56,12 @@ def run_coordinator_service(
     if prev_completed >= n_trials:
         _app_mod._done.set()
 
-    # --- Discover address ---
-    actual_port = _find_free_port(port or 8765)
-    ip = _get_local_ip()
-    endpoint_url = f"http://{ip}:{actual_port}"
-
-    # --- Register rendezvous endpoint ---
-    from metaflow_optuna.rendezvous import register_endpoint
-    register_endpoint(coordinator_id, endpoint_url)
-
-    # --- Start uvicorn in a daemon thread ---
-    config = uvicorn.Config(
-        app,
-        host="0.0.0.0",
-        port=actual_port,
-        log_level="warning",
-        access_log=False,
-    )
-    server = uvicorn.Server(config)
-
-    server_thread = threading.Thread(target=server.run, daemon=True)
-    server_thread.start()
-
-    # Give uvicorn a moment to bind
-    time.sleep(1.5)
-
     print(
-        f"[metaflow-optuna] coordinator listening on {endpoint_url} "
-        f"({n_trials} trials, {direction})"
+        f"[metaflow-optuna] starting coordinator for {n_trials} trials ({direction})"
     )
 
-    # --- Block until all trials tell() in ---
-    fired = _app_mod._done.wait(timeout=timeout)
-    if not fired:
-        print(
-            f"[metaflow-optuna] coordinator timeout after {timeout}s "
-            f"({_app_mod._completed}/{n_trials} completed)"
-        )
-
-    server.should_exit = True
+    # --- Delegate lifecycle to FastAPIService ---
+    svc = FastAPIService(app=app, done=_done, port=port, timeout=timeout)
+    svc.run(service_id=coordinator_id, namespace="metaflow-optuna")
 
     return _app_mod._study
