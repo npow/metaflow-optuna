@@ -1,5 +1,5 @@
 """
-Thin wrapper around metaflow_session_service.rendezvous with a fixed
+Thin wrapper around metaflow_coordinator.rendezvous with a fixed
 namespace of "metaflow-optuna".
 
 S3 key format (preserved from v0.1):
@@ -8,7 +8,7 @@ S3 key format (preserved from v0.1):
 """
 from __future__ import annotations
 
-import metaflow_session_service.rendezvous as _r
+import metaflow_coordinator.rendezvous as _r
 
 _NAMESPACE = "metaflow-optuna"
 
@@ -28,7 +28,7 @@ def await_coordinator(
     poll_interval: float = 2.0,
 ) -> str:
     from .exceptions import CoordinatorNotReadyError
-    from metaflow_session_service.exceptions import ServiceNotReadyError
+    from metaflow_coordinator.exceptions import ServiceNotReadyError
 
     try:
         return _r.await_service(

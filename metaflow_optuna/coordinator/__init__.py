@@ -26,7 +26,7 @@ def run_coordinator_service(
 
     Called from within the @optuna_coordinator-decorated step.
     """
-    from metaflow_session_service import FastAPIService
+    from metaflow_coordinator import FastAPIService
 
     from .app import app, _done
     import metaflow_optuna.coordinator.app as _app_mod
