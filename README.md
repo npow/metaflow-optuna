@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/metaflow-optuna?style=flat-square)](https://pypi.org/project/metaflow-optuna/)
 [![CI](https://github.com/npow/metaflow-optuna/actions/workflows/ci.yml/badge.svg)](https://github.com/npow/metaflow-optuna/actions/workflows/ci.yml)
 [![Python versions](https://img.shields.io/pypi/pyversions/metaflow-optuna?style=flat-square)](https://pypi.org/project/metaflow-optuna/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE) [![Docs](https://img.shields.io/badge/docs-mintlify-18a34a?style=flat-square)](https://mintlify.com/npow/metaflow-optuna)
 
 Optuna hyperparameter tuning that fits naturally into Metaflow — parallel trials as native tasks, adaptive TPE that actually adapts, and results you can read without digging through logs.
 
